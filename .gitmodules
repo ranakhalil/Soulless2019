@@ -1,3 +1,6 @@
 [submodule "src/particle_filter"]
 	path = src/particle_filter
 	url = https://github.com/ranakhalil/particle_filter.git
+[submodule "src/roscco"]
+	path = src/roscco
+	url = git@github.com:ranakhalil/roscco.git
