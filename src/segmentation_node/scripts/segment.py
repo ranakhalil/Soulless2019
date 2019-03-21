@@ -16,26 +16,11 @@ class RosNode(object):
         self.seg_net.half()
         self.seg_net.cuda()
         self.bridge = CvBridge()
-        self.image_pub = rospy.Publisher('raw_image', Image, queue_size=1)
         self.pub = rospy.Publisher('segmented_image', Image, queue_size=1)
+        rospy.Subscriber('raw_image', Image, self.detect)
         rospy.init_node('segmentation_node', anonymous=True)
-        self.camera_port = rospy.get_param("~camera_port")
-        print("Camera Port", self.camera_port)
-        cap = cv2.VideoCapture(self.camera_port)
-        while not cap.isOpened():
-            cap = cv2.VideoCapture(self.camera_port)
-            cv2.waitKey(1000)
-            rospy.logerr("Wait for the header")
-        while not rospy.is_shutdown():
-            ret, frame = cap.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            #frame = frame[::2,::2]
-            if ret is False:
-                rospy.logerr("Failed to read image from camera")
-                continue
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, 'rgb8'))
-            rospy.logerr("Published raw image")
-            self.detect(frame)
+        rospy.spin()
+
 
     def eval(self, x):
         self.seg_net.train(False)
@@ -43,8 +28,14 @@ class RosNode(object):
             _, res = nn.Softmax2d()(self.seg_net(x)).max(1)
         return res
 
-    def detect(self, image):
-        # image = image[::2,::2,:]
+    def detect(self, data):
+        try:
+            image = self.bridge.imgmsg_to_cv2(data, 'rgb8')
+        except CvBridgeError as e:
+            print(e)
+        # rospy.logerr(image.shape)
+
+        # image = image[::2,::2]
 
         dat = image.reshape((-1, image.shape[0], image.shape[1], image.shape[2]))
         dat = dat / 255.
@@ -53,7 +44,7 @@ class RosNode(object):
         tmp = (res == 14)
         res = np.dstack(((res==1)*255, tmp*255, (res==8)*255)).astype(np.uint8)
         self.pub.publish(self.bridge.cv2_to_imgmsg(res, 'rgb8'))
-        rospy.logerr("Published segmented image")
+        # rospy.logerr("Published segmented image")
 
 if __name__ == '__main__':
     try:
