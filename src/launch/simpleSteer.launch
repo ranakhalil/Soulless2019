@@ -1,0 +1,19 @@
+<launch>
+  <arg name="camera_port" default="0"/>
+  <arg name="simple_steer" default="true"/>
+  <arg name="poly_deg" default="1"/>
+  <arg name="can_channel" default="0"/>
+
+  <node name="trajectory_node" pkg="trajectory_node" type="trajectory.py" >
+    <param name="simple_steer" value="$(arg simple_steer)" type="bool" />
+    <param name="poly_deg" value="$(arg poly_deg)"/>
+  </node>
+  <node name="segmentation_node" pkg="segmentation_node" type="segment.py" />
+  <node name="obd_reader" pkg="obd_reader" type="obd_reader.py" />
+  <node name="roscco_node" pkg="roscco" type="roscco_node">
+    <param name="_can_channel" value="$(arg can_channel)"/>
+  </node>
+  <node name="camera_node" pkg="camera_node" type="camera.py" >
+    <param name="camera_port" value="$(arg camera_port)" />
+  </node>
+</launch>
