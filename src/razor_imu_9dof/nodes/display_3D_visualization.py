@@ -28,7 +28,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rospy
-from visual import *
+from vpython import *
 import math
 import wx
 
