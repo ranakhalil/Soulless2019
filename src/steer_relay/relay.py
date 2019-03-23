@@ -18,7 +18,7 @@ class RosNode(object):
     def relay(self, data):
         msg = SteeringCommand()
         msg.steering_torque = max(min(data.data, .3), -.3)
-        rospy.logerr(msg)
+        #rospy.logerr(msg)
         self.pub.publish(msg)
 
 if __name__ == '__main__':

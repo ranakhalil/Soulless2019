@@ -4,8 +4,8 @@
   <arg name="simple_steer" default="true"/>
   <arg name="poly_deg" default="1"/>
   <arg name="can_channel" default="0"/>
-  <arg name="mode" default="record"/>
-  <node name="trajectory_arc_node" pkg="trajectory_node" type="trajectoryArc.py" />
+  <arg name="mode" default="test"/>
+  <!-- <node name="trajectory_arc_node" pkg="trajectory_node" type="trajectoryArc.py" />-->
   <node name="segmentation_node" pkg="segmentation_node" type="segment.py" />
   <node name="obd_reader" pkg="obd_reader" type="obd_reader.py" />
   <node name="roscco_node" pkg="roscco" type="roscco_node">
@@ -30,9 +30,9 @@
 
 
   <node ns="steer" name="lateral_pid" pkg="pid" type="controller" >
-    <param name="Kp" value="0.001" />
-    <param name="Ki" value="0.00001" />
-    <param name="Kd" value="0" />
+    <param name="Kp" value="0.003" />
+    <param name="Ki" value="0.0005" />
+    <param name="Kd" value="0.001" />
     <param name="upper_limit" value="1" />
     <param name="lower_limit" value="-1" />
     <param name="windup_limit" value="1" />
