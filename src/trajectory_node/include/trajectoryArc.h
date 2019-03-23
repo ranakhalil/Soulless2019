@@ -9,13 +9,16 @@ class TrajectoryArc {
     public:
         TrajectoryArc();
     private:
-        float steering_theta = 0.0
-        float horizon = 0.0
-        float height = 0.0
-        float width = 0.0
-        bool _params_initialized = false
-        float alpha = 0.2
+        float steering_theta = 0.0;
+        float horizon = 0.0;
+        float height = 0.0;
+        float width = 0.0;
+        bool _params_initialized = false;
+        float alpha = 0.2;
+        ros::NodeHandle nodeHandle_;
+        ros::Publisher  steeringPublisher_;
         cv_bridge::CvImagePtr cv_ptr;
+        
         /* Functions */
 	    int is_red_pixel(vector<vector<vector<float>>> image, int x, int y);
 	    bool is_green_pixel(vector<vector<vector<float>>> image, int x, int y);
