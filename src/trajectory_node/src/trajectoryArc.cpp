@@ -17,7 +17,7 @@ TrajectoryArc::TrajectoryArc() {
 
 int TrajectoryArc::is_red_pixel(vector<vector<vector<float>>> image, int x, int y)
 {
-	if(image[y][x][0] == 0 and image[y][x][1] == 0 and image[y][x][2] == 255)
+	if(image[y][x][0] == 0 && image[y][x][1] == 0 && image[y][x][2] == 255)
 		return 1;
 	return 0;
 }
