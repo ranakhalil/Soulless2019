@@ -33,9 +33,9 @@
 
 
   <node ns="steer" name="lateral_pid" pkg="pid" type="controller" >
-    <param name="Kp" value="0.0015" />
+    <param name="Kp" value="0.005" />
     <param name="Ki" value="0.0002" />
-    <param name="Kd" value="0.001" />
+    <param name="Kd" value="0.0" />
     <param name="upper_limit" value="1" />
     <param name="lower_limit" value="-1" />
     <param name="windup_limit" value="1" />

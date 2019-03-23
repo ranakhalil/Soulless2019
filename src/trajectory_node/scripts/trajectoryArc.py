@@ -141,7 +141,8 @@ class RosNode(object):
         # msg.linear.x = 0.0
         # msg.angular.x = self.steering_theta
         msg = Float64()
-        msg.data = 450*self.steering_theta
+        msg.data = max(min(2*450*self.steering_theta, 450), -450)
+
         self.steeringTwistPub.publish(msg)
         
         if self.visualize:

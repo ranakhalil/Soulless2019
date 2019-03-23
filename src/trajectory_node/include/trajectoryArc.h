@@ -1,20 +1,13 @@
-#!/usr/bin/env python
-# license removed for brevity
-import rospy
-from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64
-from sensor_msgs.msg import Image
-import numpy as np
-import time
-import math
-from math import ceil
-from cv_bridge import CvBridge, CvBridgeError
-import <vector>
+#include <ros/ros.h>
+#include "sensor_msgs/Image.h"
+#include "std_msgs/Float64.h"
+#include <cv_bridge/cv_bridge.h>
+#include <vector>
 using namespace std;
 
-TRAJECTOR_PIXELS = [10711, 12315, 13894, 9520, 13894, 12315, 10711]
-STEERING_RATIOS = [-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0]
-R = [100, 150, 200]
+vector<int> TRAJECTOR_PIXELS = {10711, 12315, 13894, 9520, 13894, 12315, 10711}
+vector<float> STEERING_RATIOS = {-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0}
+vector<int> R = {100, 150, 200}
 
 class RosNode:
     public:
@@ -26,6 +19,7 @@ class RosNode:
         float width = 0.0
         bool _params_initialized = false
         float alpha = 0.2
+        cv_bridge::CvImagePtr cv_ptr;
     def __init__(self):
         rospy.init_node('trajectory_arc_node', anonymous= True )
         self.visualize = rospy.get_param('~visualize')
@@ -41,92 +35,30 @@ class RosNode:
 	vector<float> softmax(vector<float> x);
     int center_trajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
 
-	int right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true)
-	{
-	
-		int red_pixel_count = 0;
-		int height = image.size();
-		int width = image[0].size();
-		int horizion = height*.4;
-		
-		for(int y = height-50; y > horizion; y--)
-		{
-		    xL = width;
-		    xR = width;
-		    if ( R + r ) * ( R + r )-( y - height ) * ( y - height) >= 0 :
-                xL = int((ceil( (float)width / 2. )+(R-r))-math.sqrt(( R + r ) * ( R + r ) - ( y-self.height )*(y - self.height)))
-            if (R-r) * (R-r)-( y - self.height ) * ( y - self.height ) >= 0:
-                xR = int((ceil( self.width /2. )+(R+r))-math.sqrt((R-r)*(R-r)-( y-self.height )*( y-self.height )))
-            xL = max( min( xL, self.width ), 0 )
-            xR = max( min( xR, self.width ), 0 )
-            x_count = 0
-		    for(int x = xL; x < xR; x++)
-		    {
-		        red_pixel_count += is_red_pixel(image,x,y);
-		        if(visualize and is_red_pixel(image,x,y)==1)
-		        {
-		        	image[y][x][0] = 255;
-		        	image[y][x][1] = 255;
-		        	image[y][x][2] = 255;
-		        }
-		        else if(is_green_pixel(image,x,y))
-		        	return red_pixel_count;
-		    }
-		}
-		return red_pixel_count;
-	}
+	int right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true);
 
-    
+	int left_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true);
 
-    ## Right Trajectories
-    def right_trajectories(self, image, R, r, LTolerance, visualize=True):
-        red_pixel_count = 0
-        for y in range(self.height - 50, self.horizon , -1):
-            xL = self.width
-            xR = self.width
-            if ( R + r ) * ( R + r )-( y - self.height ) * ( y - self.height) >= 0 :
-                xL = int((ceil( self.width / 2. )+(R-r))-math.sqrt(( R + r ) * ( R + r ) - ( y-self.height )*(y - self.height)))
-            if (R-r) * (R-r)-( y - self.height ) * ( y - self.height ) >= 0:
-                xR = int((ceil( self.width /2. )+(R+r))-math.sqrt((R-r)*(R-r)-( y-self.height )*( y-self.height )))
-            xL = max( min( xL, self.width ), 0 )
-            xR = max( min( xR, self.width ), 0 )
-            x_count = 0
-            for x in range(xL, xR):
-                red_pixel_count += self.is_red_pixel(image, x, y)
-                if visualize and int(image[y, x, 2] == 255 and image[y, x, 0] == 0 and image[y, x, 1] == 0):
-                    image[y,x] = (255, 255, 255)
-                elif int(image[y, x, 2] == 0 and image[y, x, 0] == 0 and image[y, x, 1] == 255):
-                    if (x_count < LTolerance):
-                        return red_pixel_count
-                    else:
-                        break
-                x_count += 1
-        return red_pixel_count
-
-    ## Left Trajectories
-    def left_trajectories(self, image, R, r, LTolerance, visualize=True):
-        red_pixel_count = 0
-        for y in range(self.height - 50, self.horizon , -1):
-            xL = 0
-            xR = 0
-            if (R-r)*(R-r)-( y-self.height )*( y-self.height ) >= 0 :
-                xL = int((ceil( self.width/2. )-(R+r)) + math.sqrt((R-r) * (R-r)-( y-self.height )*( y-self.height )))
-            if (R+r) * (R+r) - (y-self.height) * (y-self.height) >= 0:
-                xR = int((ceil( self.width/2. )-(R-r)) + math.sqrt((R+r)*(R+r)-( y-self.height )*( y-self.height )))
-            xL = max(min( xL, self.width ),0)
-            xR = max(min( xR, self.width ),0)
-            x_count = 0
-            for x in range(xR - 1, xL-1, -1):
-                red_pixel_count += self.is_red_pixel(image, x, y)
-                if visualize and int(image[y, x, 2] == 255 and image[y, x, 0] == 0 and image[y, x, 1] == 0):
-                    image[y,x] = (255, 255, 255)
-                elif int(image[y, x, 2] == 0 and image[y, x, 0] == 0 and image[y, x, 1] == 255):
-                    if (x_count < LTolerance):
-                        return red_pixel_count
-                    else:
-                        break
-                x_count += 1
-        return red_pixel_count
+    void callback(const sensor_msgs::ImageConstPtr& msg) {
+        try {
+            cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        } catch (cv_bridge::Exception& e) {
+            ROS_ERROR("cv_bridge exception: %s", e.what());
+            return;
+        }
+        std::vector<float> results = std::vector<int>(7);
+        results[0] = (float)this->left_trajectories(image, R[0], 10, 10, False);
+        results[1] = (float)this->left_trajectories(image, R[1], 10, 10, False);
+        results[2] = (float)this->left_trajectories(image, R[2], 10, 10, False);
+        results[3] = (float)this->center_trajectories(image, 20, False);
+        results[4] = (float)this->right_trajectories(image, R[2], 10, 10, False);
+        results[5] = (float)this->right_trajectories(image, R[1], 10, 10, False);
+        results[6] = (float)this->right_trajectories(image, R[0], 10, 10, False);
+        for(int i=0; i<7; i++) {
+            results[i] /= (float)TRAJECTOR_PIXELS[i];
+        }
+        
+    }
 
 
     def callback(self, data):
@@ -142,17 +74,6 @@ class RosNode:
             self.horizon = int(self.height * 0.4)
             self._params_initialized = True
             rospy.loginfo("Image Params has been initialized")
-
-        results = []
-        results.append(self.left_trajectories(image, R[0], 10, 10, False))
-        results.append(self.left_trajectories(image, R[1], 10, 10, False))
-        results.append(self.left_trajectories(image, R[2], 10, 10, False))
-
-        results.append(self.center_trajectories(image, 20, False))
-
-        results.append(self.right_trajectories(image, R[2], 10, 10, False))
-        results.append(self.right_trajectories(image, R[1], 10, 10, False))
-        results.append(self.right_trajectories(image, R[0], 10, 10, False))
         
         results = np.array( results, dtype = float ) / np.array( TRAJECTOR_PIXELS, dtype = float )
         results = self.softmax(results)
