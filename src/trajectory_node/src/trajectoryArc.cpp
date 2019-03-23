@@ -80,6 +80,80 @@ int center_trajectories(vector<vector<vector<float>>> image, int r, bool visuali
     return red_pixel_count;
 }
 
+
+int right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true)
+{
+
+	int red_pixel_count = 0;
+	int height = image.size();
+	int width = image[0].size();
+	int horizion = height*.4;
+	
+	for(int y = height-50; y > horizion; y--)
+	{
+	    xL = width;
+	    xR = width;
+	    if ( R + r ) * ( R + r )-( y - height ) * ( y - height) >= 0 :
+            xL = int((ceil( (float)width / 2. )+(R-r))-math.sqrt(( R + r ) * ( R + r ) - ( y-height )*(y - height)))
+        if (R-r) * (R-r)-( y - height ) * ( y - height ) >= 0:
+            xR = int((ceil( width /2. )+(R+r))-math.sqrt((R-r)*(R-r)-( y-height )*( y-height )))
+        xL = max( min( xL, width ), 0 )
+        xR = max( min( xR, width ), 0 )
+        x_count = 0
+	    for(int x = xL; x < xR; x++)
+	    {
+	        red_pixel_count += is_red_pixel(image,x,y);
+	        if(visualize and is_red_pixel(image,x,y)==1)
+	        {
+	        	image[y][x][0] = 255;
+	        	image[y][x][1] = 255;
+	        	image[y][x][2] = 255;
+	        }
+	        else if(is_green_pixel(image,x,y)) {
+                if (x_count < LTolerance) return red_pixel_count;
+                else break;
+            }
+	    }
+	}
+	return red_pixel_count;
+}
+
+int left_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true)
+{
+
+	int red_pixel_count = 0;
+	int height = image.size();
+	int width = image[0].size();
+	int horizion = height*.4;
+	
+	for(int y = height-50; y > horizion; y--)
+	{
+	    xL = 0;
+	    xR = 0;
+	    if ( R - r ) * ( R - r )-( y - height ) * ( y - height) >= 0 :
+            xL = int((ceil( (float)width / 2. )-(R+r))-math.sqrt(( R - r ) * ( R - r ) - ( y-height )*(y - height)))
+        if (R+r) * (R+r)-( y - height ) * ( y - height ) >= 0:
+            xR = int((ceil( self.width /2. )+(R-r))-math.sqrt((R+r)*(R+r)-( y-height )*( y-height )))
+        xL = max( min( xL, width ), 0 )
+        xR = max( min( xR, width ), 0 )
+        x_count = 0
+	    for(int x = xR-1; x < xL; x--)
+	    {
+	        red_pixel_count += is_red_pixel(image,x,y);
+	        if(visualize & is_red_pixel(image,x,y)==1)
+	        {
+	        	image[y][x][0] = 255;
+	        	image[y][x][1] = 255;
+	        	image[y][x][2] = 255;
+	        }
+	        else if(is_green_pixel(image,x,y)) {
+                if (x_count < LTolerance) return red_pixel_count;
+                else break;
+            }
+	    }
+	}
+	return red_pixel_count;
+}
     
 
     ## Center Trajectories
