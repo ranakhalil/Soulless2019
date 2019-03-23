@@ -2,6 +2,7 @@
 #include "sensor_msgs/Image.h"
 #include "std_msgs/Float64.h"
 #include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
@@ -17,6 +18,7 @@ using namespace cv;
 class TrajectoryArc {
     public:
         TrajectoryArc();
+
     private:
         float steering_theta = 0.0;
         float horizon = 0.0;
@@ -26,6 +28,8 @@ class TrajectoryArc {
         float alpha = 0.2;
         ros::NodeHandle nodeHandle_;
         ros::Publisher  steeringPublisher_;
+        ros::Publisher  steeringTrajectoryPublisher_;
+        ros::Subscriber segmentedImage_;
         cv_bridge::CvImagePtr cv_ptr;
         
         /* Functions */
@@ -35,7 +39,7 @@ class TrajectoryArc {
         int center_trajectories(cv::Mat image, int r, bool visualize);
 	    int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
 	    int left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
-        void callback(const sensor_msgs::ImageConstPtr& msg);
         int dot(vector<float> v_a, vector<float> v_b);
+        void callback(const sensor_msgs::ImageConstPtr& msg);
 };
 

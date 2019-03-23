@@ -4,15 +4,11 @@ vector<int> TRAJECTOR_PIXELS = {10711, 12315, 13894, 9520, 13894, 12315, 10711};
 vector<float> STEERING_RATIOS = {-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0};
 vector<int> R = {100, 150, 200};
 
-TrajectoryArc::TrajectoryArc() {
-        // rospy.init_node('trajectory_arc_node', anonymous= True )
-        // self.visualize = rospy.get_param('~visualize')
-        // self.time_since_last_update = rospy.get_rostime().secs
-        // self.bridge = CvBridge()
-        // self.steeringTwistPub = rospy.Publisher('/steering', Float64, queue_size=1)
-        // self.imageTrajectoryPub = rospy.Publisher('/trajectory_image', Image, queue_size=1)
-        // rospy.Subscriber('/segmented_image', Image, self.callback, queue_size=1, buff_size=2**24)
-        // rospy.spin()
+TrajectoryArc::TrajectoryArc()
+{
+    this->steeringPublisher_ = this->nodeHandle_.advertise<std_msgs::Float64>("steering", 1);
+    this->steeringTrajectoryPublisher_ = this->nodeHandle_.advertise<std_msgs::Float64>("trajectory_image", 1);
+    this->segmentedImage_ = this->nodeHandle_.subscribe("segmented_image", 1, &TrajectoryArc::callback, this);
 }
 
 int TrajectoryArc::is_red_pixel(cv::Mat image, int x, int y)
@@ -222,13 +218,16 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
 
         steeringDotProduct = this->dot(results, STEERING_RATIOS);
         this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
+        
+        std_msgs::Float64 steering_msg;
+        steering_msg.data = max( min( (float)(2 * 450 * this->steering_theta), (float) 450.0), (float)-450.0);
+        this->steeringPublisher_.publish(steering_msg);  
     }
 
     int main(int argc, char* argv[])
     {
-	
-	ros::init(argc, argv, "trajectory_node");
-	TrajectoryArc node = TrajectoryArc();
-	ros::spin();
-	return 0;
+        ros::init(argc, argv, "trajectory_node");
+	    TrajectoryArc node = TrajectoryArc();
+        ros::spin();
+	    return 0;
     }
