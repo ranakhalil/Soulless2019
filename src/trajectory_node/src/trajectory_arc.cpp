@@ -174,7 +174,7 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
             
         if ( (R+r) * (R+r)-( y - height ) * ( y - height ) >= 0 )
         {
-             xR = (int) ((ceil( (float) width / 2.0 )+(R-r) ) + sqrt((R+r)*(R+r)-( y-height ) * ( y- height )));
+             xR = (int) ((ceil( (float) width / 2.0 )-(R-r) ) + sqrt((R+r)*(R+r)-( y-height ) * ( y- height )));
         }
         xL = max( min( xL, width ), 0 );
 
