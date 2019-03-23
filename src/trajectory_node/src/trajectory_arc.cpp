@@ -190,7 +190,7 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
         xL = max( min( xL, width ), 0 );
         xR = max( min( xR, width ), 0 );
         int x_count = 0;
-	    for(int x = xR-1; x < xL; x--)
+	    for(int x = xR; x < xL; x--)
 	    {
 	        red_pixel_count += is_red_pixel(image,x,y);
             // ROS_ERROR("is_red_pixel: %d", is_red_pixel(image,x,y));
