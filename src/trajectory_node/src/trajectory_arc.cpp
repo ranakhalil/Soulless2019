@@ -74,9 +74,9 @@ int TrajectoryArc::center_trajectories(cv::Mat image, int r, bool visualize=fals
             red_pixel_count = red_pixel_count + is_red_pixel(image,x,y);
             if(visualize && is_red_pixel(image,x,y) == 1)
             {
-            	cloned_image.data[y, x, 0] = 255;
-            	cloned_image.data[y, x, 1] = 255;
-            	cloned_image.data[y, x, 2] = 255;
+            	cloned_image.at<Vec3b>(y, x)[0] = 255;
+            	cloned_image.at<Vec3b>(y, x)[1] = 255;
+            	cloned_image.at<Vec3b>(y, x)[2] = 255;
             }
             else if(is_green_pixel(image, x, y))
             {
@@ -133,9 +133,9 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
 	        red_pixel_count = red_pixel_count + is_red_pixel(image,x,y);
 	        if(visualize and is_red_pixel(image,x,y)==1)
 	        {
-            	cloned_image.data[y, x, 0] = 255;
-            	cloned_image.data[y, x, 1] = 255;
-            	cloned_image.data[y, x, 2] = 255;
+            	cloned_image.at<Vec3b>(y, x)[0] = 255;
+            	cloned_image.at<Vec3b>(y, x)[1] = 255;
+            	cloned_image.at<Vec3b>(y, x)[2] = 255;
 	        }
 	        else if(is_green_pixel(image,x,y)) {
                 if (x_count < LTolerance)
@@ -178,14 +178,15 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
 	    int xR = 0;
 	    if (( R - r ) * ( R - r )-( y - height ) * ( y - height) >= 0)
         {
-            xL = (int) ((ceil( (float) width / 2.0 )-(R+r)) - sqrt(( R - r ) * ( R - r ) - ( y-height ) * (y - height)));
+            xL = (int) ((ceil( (float) width / 2.0 )-(R+r)) + sqrt(( R - r ) * ( R - r ) - ( y-height ) * (y - height)));
         }
             
         if ( (R+r) * (R+r)-( y - height ) * ( y - height ) >= 0 )
         {
-             xR = (int) ((ceil( (float) width / 2.0 )+(R-r) )- sqrt((R+r)*(R+r)-( y-height ) * ( y- height )));
+             xR = (int) ((ceil( (float) width / 2.0 )+(R-r) ) + sqrt((R+r)*(R+r)-( y-height ) * ( y- height )));
         }
         xL = max( min( xL, width ), 0 );
+
         xR = max( min( xR, width ), 0 );
         
         int x_count = 0;
@@ -194,9 +195,10 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
 	        red_pixel_count += is_red_pixel(image,x,y);
 	        if(visualize && is_red_pixel(image,x,y) == 1)
 	        {
-            	cloned_image.data[y, x, 0] = 255;
-            	cloned_image.data[y, x, 1] = 255;
-            	cloned_image.data[y, x, 2] = 255;
+            
+            	cloned_image.at<Vec3b>(y, x)[0] = 255;
+            	cloned_image.at<Vec3b>(y, x)[1] = 255;
+            	cloned_image.at<Vec3b>(y, x)[2] = 255;
 	        }
 	        else if(is_green_pixel(image,x,y)) 
             {
@@ -227,29 +229,21 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
         }
-        
-        results[0] = (float)this->left_trajectories(cv_ptr->image, R[0], 10, 10, this->visualize);
-        results[1] = (float)this->left_trajectories(cv_ptr->image, R[1], 10, 10, this->visualize);
-        results[2] = (float)this->left_trajectories(cv_ptr->image, R[2], 10, 10, this->visualize);
-        results[3] = (float)this->center_trajectories(cv_ptr->image, 20, this->visualize);
-        results[4] = (float)this->right_trajectories(cv_ptr->image, R[2], 10, 10, this->visualize);
-        results[5] = (float)this->right_trajectories(cv_ptr->image, R[1], 10, 10, this->visualize);
-        results[6] = (float)this->right_trajectories(cv_ptr->image, R[0], 10, 10, this->visualize);
-        for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
+        results[0] = (float)this->left_trajectories(cv_ptr->image, R[0], 10, 10, true);
+        results[1] = (float)this->left_trajectories(cv_ptr->image, R[1], 10, 10, true);
+        results[2] = (float)this->left_trajectories(cv_ptr->image, R[2], 10, 10, true);
+        results[3] = (float)this->center_trajectories(cv_ptr->image, 20, true);
+        results[4] = (float)this->right_trajectories(cv_ptr->image, R[2], 10, 10, true);
+        results[5] = (float)this->right_trajectories(cv_ptr->image, R[1], 10, 10, true);
+        results[6] = (float)this->right_trajectories(cv_ptr->image, R[0], 10, 10, true);
+        ROS_ERROR("results[0] %.3f", results[0]);
         for(int i=0; i < 7; i++) {
             results[i] /= (float)TRAJECTOR_PIXELS[i];
         }
-        for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
         
         results = this->softmax(results);
-        for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
-        //steeringDotProduct = inner_product(results, results + sizeof(results) / sizeof(results[0]), STEERING_RATIOS, 0);
-        // ROS_ERROR("steeringDotProduct %.3f", steeringDotProduct);
-        
         float steeringDotProduct = this->dot(results, STEERING_RATIOS);
-
         this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
-
         std_msgs::Float64 steering_msg;
         steering_msg.data = max( min( (float)(250 * this->steering_theta), (float) 450.0), (float)-450.0);
         this->steeringPublisher_.publish(steering_msg);  
