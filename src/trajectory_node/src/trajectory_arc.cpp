@@ -57,8 +57,14 @@ int TrajectoryArc::center_trajectories(cv::Mat image, int r, bool visualize=fals
     cv::Size size = image.size();
     int height = size.height;
     int width = size.width;
+    Mat cloned_image;
 
     int horizon = height * 0.4;
+
+    if (visualize)
+    {
+        cloned_image = image.clone();
+    }
 
     for(int y = height - 50; y > horizon; y--)
     {
@@ -82,6 +88,12 @@ int TrajectoryArc::center_trajectories(cv::Mat image, int r, bool visualize=fals
             }
         }
     }
+
+    if (visualize)
+    {
+        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), sensor_msgs::image_encodings::BGR8, cloned_image).toImageMsg();
+        this->steeringTrajectoryPublisher_.publish(msg);
+    }
     
     return red_pixel_count;
 }
@@ -94,9 +106,15 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
     cv::Size size = image.size();
     int height = size.height;
     int width = size.width;
+    Mat cloned_image;
     
     int horizon = height * 0.4;
 	
+    if (visualize)
+    {
+        cloned_image = image.clone();
+    }
+
 	for(int y = height-50; y > horizon; y--)
 	{
 	    int xL = width;
@@ -113,17 +131,17 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
             
         xL = max( min( xL, width ), 0 );
         xR = max( min( xR, width ), 0 );
-        int x_count = 0;
+        int x_count = 0;    
 	    for(int x = xL; x < xR; x++)
 	    {
 	        red_pixel_count = red_pixel_count + is_red_pixel(image,x,y);
 	        if(visualize and is_red_pixel(image,x,y)==1)
 	        {
-	        	Vec3b colour = image.at<Vec3b>(Point(x, y));
+	        	Vec3b colour = cloned_image.at<Vec3b>(Point(x, y));
             	colour[0] = 255;
             	colour[1] = 255;
             	colour[2] = 255;
-                image.at<Vec3b>(Point(x, y)) = colour;
+                cloned_image.at<Vec3b>(Point(x, y)) = colour;
 	        }
 	        else if(is_green_pixel(image,x,y)) {
                 if (x_count < LTolerance)
@@ -137,6 +155,11 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
             }
 	    }
 	}
+    if (visualize)
+    {
+        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), sensor_msgs::image_encodings::BGR8, cloned_image).toImageMsg();
+        this->steeringTrajectoryPublisher_.publish(msg);
+    }
 	return red_pixel_count;
 }
 
@@ -146,9 +169,14 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
     cv::Size size = image.size();
     int height = size.height;
     int width = size.width;
-    
+    Mat cloned_image;
     int horizon = height * 0.4;
 	
+    if (visualize)
+    {
+        cloned_image = image.clone();
+    }
+    
 	for(int y = height-50; y > horizon; y--)
 	{
 	    int xL = 0;
@@ -171,11 +199,11 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
 	        red_pixel_count += is_red_pixel(image,x,y);
 	        if(visualize && is_red_pixel(image,x,y) == 1)
 	        {
-	        	Vec3b colour = image.at<Vec3b>(Point(x, y));
+	        	Vec3b colour = cloned_image.at<Vec3b>(Point(x, y));
             	colour[0] = 255;
             	colour[1] = 255;
             	colour[2] = 255;
-                image.at<Vec3b>(Point(x, y)) = colour;
+                cloned_image.at<Vec3b>(Point(x, y)) = colour;
 	        }
 	        else if(is_green_pixel(image,x,y)) 
             {
@@ -189,6 +217,12 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
             }
 	    }
 	}
+
+    if (visualize)
+    {
+        sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), sensor_msgs::image_encodings::BGR8, cloned_image).toImageMsg();
+        this->steeringTrajectoryPublisher_.publish(msg);
+    }
 	return red_pixel_count;
 }
 
