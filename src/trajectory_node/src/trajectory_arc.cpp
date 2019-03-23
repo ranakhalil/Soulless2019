@@ -1,8 +1,8 @@
-#include "trajectoryArc.h"
+#include "trajectory_arc.h"
 
-vector<int> TRAJECTOR_PIXELS = {10711, 12315, 13894, 9520, 13894, 12315, 10711}
-vector<float> STEERING_RATIOS = {-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0}
-vector<int> R = {100, 150, 200}
+vector<int> TRAJECTOR_PIXELS = {10711, 12315, 13894, 9520, 13894, 12315, 10711};
+vector<float> STEERING_RATIOS = {-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0};
+vector<int> R = {100, 150, 200};
 
 TrajectoryArc::TrajectoryArc() {
         // rospy.init_node('trajectory_arc_node', anonymous= True )
@@ -15,16 +15,16 @@ TrajectoryArc::TrajectoryArc() {
         // rospy.spin()
 }
 
-int TrajectoryArc::is_red_pixel(vector<vector<vector<float>>> image, int x, int y)
+int TrajectoryArc::is_red_pixel(cv::Mat image, int x, int y)
 {
-	if(image[y][x][0] == 0 && image[y][x][1] == 0 && image[y][x][2] == 255)
+	if(image.at(y, x, 0) == 0 && image.at(y, x, 1) == 0 && image.at(y, x, 2) == 255)
 		return 1;
 	return 0;
 }
 
-int TrajectoryArc::is_green_pixel(vector<vector<vector<float>>> image, int x, int y)
+int TrajectoryArc::is_green_pixel(cv::Mat image, int x, int y)
 {
-	return (image[y][x][0] == 0 && image[y][x][1] == 255 && image[y][x][2] == 0);
+	return (image.at(y, x, 0) == 0 && image.at(y, x, 1) == 255 && image.at(y, x, 2) == 0);
 }
 
 int TrajectoryArc::dot(vector<float> v_a, vector<float> v_b) 
@@ -52,9 +52,8 @@ vector<float> TrajectoryArc::softmax(vector<float> x)
     return softmax_x;
 }
 
-int TrajectoryArc::center_trajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
+int TrajectoryArc::center_trajectories(cv::Mat image, int r, bool visualize=false)
 {
-
     int red_pixel_count = 0;
     int height = image.size();
     int width = image[0].size();
@@ -62,18 +61,18 @@ int TrajectoryArc::center_trajectories(vector<vector<vector<float>>> image, int 
 
     for(int y = height - 50; y > horizon; y--)
     {
-        xL = int((ceil( (float)width / 2 ) -r))
-        xR = int((ceil( (float)width / 2 ) +r))
+        int xL = (int) (ceil( (float)width / 2.0 ) - r))
+        int xR = (int) (ceil( (float)width / 2.0 ) + r))
         for(int x = xL; x < xR; x++)
         {
-            red_pixel_count += is_red_pixel(image,x,y);
-            if(visualize and is_red_pixel(image,x,y)==1)
+            red_pixel_count = red_pixel_count + is_red_pixel(image,x,y);
+            if(visualize && is_red_pixel(image,x,y)==1)
             {
-            	image[y][x][0] = 255;
-            	image[y][x][1] = 255;
-            	image[y][x][2] = 255;
+            	image.at(y, x, 0) = 255;
+            	// image[y][x][1] = 255;
+            	// image[y][x][2] = 255;
             }
-            else if(is_green_pixel(image,x,y))
+            else if(is_green_pixel(image, x, y))
             {
                 return red_pixel_count;
             }
@@ -84,7 +83,7 @@ int TrajectoryArc::center_trajectories(vector<vector<vector<float>>> image, int 
 }
 
 
-int TrajectoryArc::right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true)
+int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize=false)
 {
 
 	int red_pixel_count = 0;
@@ -94,34 +93,46 @@ int TrajectoryArc::right_trajectories(vector<vector<vector<float>>> image, int R
 	
 	for(int y = height-50; y > horizion; y--)
 	{
-	    xL = width;
-	    xR = width;
-	    if ( R + r ) * ( R + r )-( y - height ) * ( y - height) >= 0 :
-            xL = int((ceil( (float)width / 2. )+(R-r))-math.sqrt(( R + r ) * ( R + r ) - ( y-height )*(y - height)))
-        if (R-r) * (R-r)-( y - height ) * ( y - height ) >= 0:
-            xR = int((ceil( width /2. )+(R+r))-math.sqrt((R-r)*(R-r)-( y-height )*( y-height )))
+	    int xL = width;
+	    int xR = width;
+	    if( ( R + r ) * ( R + r )-( y - height ) * ( y - height) >= 0 )
+        {
+             xL = (int) ((ceil( (float)width / 2. )+(R-r)) - sqrt(( R + r ) * ( R + r ) - ( y-height )*(y - height)))
+        }
+           
+        if ((R-r) * (R-r)-( y - height ) * ( y - height ) >= 0)
+        {
+            xR = (int) ((ceil( width /2. )+(R+r))-math.sqrt((R-r)*(R-r)-( y-height )*( y-height )))
+        }
+            
         xL = max( min( xL, width ), 0 )
         xR = max( min( xR, width ), 0 )
         x_count = 0
 	    for(int x = xL; x < xR; x++)
 	    {
-	        red_pixel_count += is_red_pixel(image,x,y);
+	        red_pixel_count = red_pixel_count + is_red_pixel(image,x,y);
 	        if(visualize and is_red_pixel(image,x,y)==1)
 	        {
-	        	image[y][x][0] = 255;
-	        	image[y][x][1] = 255;
-	        	image[y][x][2] = 255;
+	        	image.at(y, x, 0) = 255;
+	        	// image[y][x][1] = 255;
+	        	// image[y][x][2] = 255;
 	        }
 	        else if(is_green_pixel(image,x,y)) {
-                if (x_count < LTolerance) return red_pixel_count;
-                else break;
+                if (x_count < LTolerance)
+                {
+                    return red_pixel_count;
+                } 
+                else 
+                {
+                    break;
+                }
             }
 	    }
 	}
 	return red_pixel_count;
 }
 
-int TrajectoryArc::left_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true)
+int TrajectoryArc::left_trajectories(cv2::Mat image, int R, int r, int LTolerance, bool visualize=true)
 {
 
 	int red_pixel_count = 0;
@@ -133,25 +144,37 @@ int TrajectoryArc::left_trajectories(vector<vector<vector<float>>> image, int R,
 	{
 	    int xL = 0;
 	    int xR = 0;
-	    if ( R - r ) * ( R - r )-( y - height ) * ( y - height) >= 0 :
-            xL = int((ceil( (float)width / 2.0 )-(R+r))-math.sqrt(( R - r ) * ( R - r ) - ( y-height )*(y - height)))
-        if (R+r) * (R+r)-( y - height ) * ( y - height ) >= 0:
-            xR = int((ceil( self.width /2. )+(R-r))-math.sqrt((R+r)*(R+r)-( y-height )*( y-height )))
+	    if (( R - r ) * ( R - r )-( y - height ) * ( y - height) >= 0)
+        {
+            xL = (int) ((ceil( (float) width / 2.0 )-(R+r)) - sqrt(( R - r ) * ( R - r ) - ( y-height ) * (y - height)))
+        }
+            
+        if ( (R+r) * (R+r)-( y - height ) * ( y - height ) >= 0 )
+        {
+             xR = (int) ((ceil( (float) width / 2.0 )+(R-r) )- sqrt((R+r)*(R+r)-( y-height ) * ( y- height )))
+        }
+           
         xL = max( min( xL, width ), 0 )
         xR = max( min( xR, width ), 0 )
         x_count = 0
 	    for(int x = xR-1; x < xL; x--)
 	    {
 	        red_pixel_count += is_red_pixel(image,x,y);
-	        if(visualize & is_red_pixel(image,x,y)==1)
+	        if(visualize && is_red_pixel(image,x,y)==1)
 	        {
-	        	image[y][x][0] = 255;
-	        	image[y][x][1] = 255;
-	        	image[y][x][2] = 255;
+	        	image.at(y, x, 0) = 255;
+	        	// image[y][x][1] = 255;
+	        	// image[y][x][2] = 255;
 	        }
-	        else if(is_green_pixel(image,x,y)) {
-                if (x_count < LTolerance) return red_pixel_count;
-                else break;
+	        else if(is_green_pixel(image,x,y)) 
+            {
+                if (x_count < LTolerance) 
+                {
+                    return red_pixel_count;
+                }
+                else {
+                    break;
+                }
             }
 	    }
 	}
@@ -184,8 +207,9 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
 
         steeringDotProduct = this->dot(results, STEERING_RATIOS);
         this->steering = this->alpha * this->steering + (1 - this->alpha) * steeringDotProduct;
+    }
 
-
-
-
+    int main(void)
+    {
+        return 0;
     }

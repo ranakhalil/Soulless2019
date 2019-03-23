@@ -3,6 +3,9 @@
 #include "std_msgs/Float64.h"
 #include <cv_bridge/cv_bridge.h>
 #include <vector>
+#include <opencv2/opencv.hpp>
+#include <math.h>
+
 using namespace std;
 
 class TrajectoryArc {
@@ -20,12 +23,12 @@ class TrajectoryArc {
         cv_bridge::CvImagePtr cv_ptr;
         
         /* Functions */
-	    int is_red_pixel(vector<vector<vector<float>>> image, int x, int y);
-	    bool is_green_pixel(vector<vector<vector<float>>> image, int x, int y);
+	    int is_red_pixel(cv::Mat image, int x, int y);
+	    bool is_green_pixel(cv::Mat image, int x, int y);
 	    vector<float> softmax(vector<float> x);
-        int center_trajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
-	    int right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true);
-	    int left_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true);
+        int center_trajectories(cv::Mat image, int r, bool visualize);
+	    int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
+	    int left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
         void callback(const sensor_msgs::ImageConstPtr& msg);
         int dot(vector<float> v_a, vector<float> v_b);
 };
