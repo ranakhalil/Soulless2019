@@ -36,38 +36,47 @@ class RosNode:
         rospy.Subscriber('/segmented_image', Image, self.callback, queue_size=1, buff_size=2**24)
         rospy.spin()
 
-	bool is_red_pixel(vector<vector<vector<float>>> image, int x, int y);
+	int is_red_pixel(vector<vector<vector<float>>> image, int x, int y);
+	bool is_green_pixel(vector<vector<vector<float>>> image, int x, int y);
 	vector<float> softmax(vector<float> x);
-    int centerTrajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
-    {
+    int center_trajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
 
-        int red_pixel_count = 0;
-        int height = image.size();
-        int width = image[0].size();
-        int horizion = height*.4;
-      
-        for(int y = height-50; y > horizion; y--)
-        {
-            xL = int((ceil( (float)width / 2 ) -r))
-            xR = int((ceil( (float)width / 2 ) +r))
-            for(int x = xL; x < xR; x++)
-            {
-                red_pixel_count += 
+	int right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true)
+	{
+	
+		int red_pixel_count = 0;
+		int height = image.size();
+		int width = image[0].size();
+		int horizion = height*.4;
+		
+		for(int y = height-50; y > horizion; y--)
+		{
+		    xL = width;
+		    xR = width;
+		    if ( R + r ) * ( R + r )-( y - height ) * ( y - height) >= 0 :
+                xL = int((ceil( (float)width / 2. )+(R-r))-math.sqrt(( R + r ) * ( R + r ) - ( y-self.height )*(y - self.height)))
+            if (R-r) * (R-r)-( y - self.height ) * ( y - self.height ) >= 0:
+                xR = int((ceil( self.width /2. )+(R+r))-math.sqrt((R-r)*(R-r)-( y-self.height )*( y-self.height )))
+            xL = max( min( xL, self.width ), 0 )
+            xR = max( min( xR, self.width ), 0 )
+            x_count = 0
+		    for(int x = xL; x < xR; x++)
+		    {
+		        red_pixel_count += is_red_pixel(image,x,y);
+		        if(visualize and is_red_pixel(image,x,y)==1)
+		        {
+		        	image[y][x][0] = 255;
+		        	image[y][x][1] = 255;
+		        	image[y][x][2] = 255;
+		        }
+		        else if(is_green_pixel(image,x,y))
+		        	return red_pixel_count;
+		    }
+		}
+		return red_pixel_count;
+	}
 
-
-    ## Center Trajectories
-    def center_trajectories(self, image, r, visualize=True):
-        red_pixel_count = 0
-        for y in range(self.height - 50, self.horizon , -1):
-            xL = int((ceil( self.width / 2. ) -r))
-            xR = int((ceil( self.width / 2. ) +r))
-            for x in range(xL, xR):
-                red_pixel_count += self.is_red_pixel(image, x, y)
-                if visualize and int(image[y, x, 2] == 255 and image[y, x, 0] == 0 and image[y, x, 1] == 0):
-                    image[y,x] = (255, 255, 255)
-                elif int(image[y, x, 2] == 0 and image[y, x, 0] == 0 and image[y, x, 1] == 255):
-                    return red_pixel_count
-        return red_pixel_count
+    
 
     ## Right Trajectories
     def right_trajectories(self, image, R, r, LTolerance, visualize=True):

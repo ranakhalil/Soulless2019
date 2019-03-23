@@ -25,9 +25,16 @@ RosNode::RosNode() {
         rospy.spin()
 }
 
-bool is_red_pixel(vector<vector<vector<float>>> image, int x, int y)
+int is_red_pixel(vector<vector<vector<float>>> image, int x, int y)
 {
-	return image[y][x][0] == 0 and image[y][x][1] == 0 and image[y][x][2] == 255; 
+	if(image[y][x][0] == 0 and image[y][x][1] == 0 and image[y][x][2] == 255)
+		return 1;
+	return 0;
+}
+
+int is_green_pixel(vector<vector<vector<float>>> image, int x, int y)
+{
+	return (image[y][x][0] == 0 and image[y][x][1] == 255 and image[y][x][2] == 0);
 }
 
 vector<float> softmax(vector<float> x)
@@ -45,14 +52,35 @@ vector<float> softmax(vector<float> x)
     return softmax_x;
 }
 
-    def is_red_pixel(self, image, x, y):
-        if image[y, x, 2] == 255 and image[y, x, 0] == 0 and image[y, x, 1] == 0:
-            return 1
-        return 0
+int center_trajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
+{
 
-    def softmax(self, x):
-        """Compute softmax values for each sets of scores in x."""
-        return np.exp(x) / np.sum(np.exp(x), axis=0)
+    int red_pixel_count = 0;
+    int height = image.size();
+    int width = image[0].size();
+    int horizion = height*.4;
+  
+    for(int y = height-50; y > horizion; y--)
+    {
+        xL = int((ceil( (float)width / 2 ) -r))
+        xR = int((ceil( (float)width / 2 ) +r))
+        for(int x = xL; x < xR; x++)
+        {
+            red_pixel_count += is_red_pixel(image,x,y);
+            if(visualize and is_red_pixel(image,x,y)==1)
+            {
+            	image[y][x][0] = 255;
+            	image[y][x][1] = 255;
+            	image[y][x][2] = 255;
+            }
+            else if(is_green_pixel(image,x,y))
+            	return red_pixel_count;
+        }
+    }
+    return red_pixel_count;
+}
+
+    
 
     ## Center Trajectories
     def center_trajectories(self, image, r, visualize=True):
