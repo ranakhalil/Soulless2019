@@ -25,12 +25,14 @@ class TrajectoryArc {
         float height = 0.0;
         float width = 0.0;
         bool _params_initialized = false;
+        bool visualize_ = true; /* Get from fucking param */
         float alpha = 0.2;
         ros::NodeHandle nodeHandle_;
         ros::Publisher  steeringPublisher_;
         ros::Publisher  steeringTrajectoryPublisher_;
         ros::Subscriber segmentedImage_;
         cv_bridge::CvImagePtr cv_ptr;
+        Mat cloned_image_;
         
         /* Functions */
 	    int is_red_pixel(cv::Mat image, int x, int y);
