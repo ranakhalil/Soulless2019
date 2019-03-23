@@ -224,7 +224,11 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
         this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
     }
 
-    int main(void)
+    int main(int argc, char* argv[])
     {
-        return 0;
+	
+	ros::init(argc, argv, "trajectory_node");
+	TrajectoryArc node = TrajectoryArc();
+	ros::spin();
+	return 0;
     }
