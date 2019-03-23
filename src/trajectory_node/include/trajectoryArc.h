@@ -9,19 +9,24 @@ import time
 import math
 from math import ceil
 from cv_bridge import CvBridge, CvBridgeError
+import <vector>
+using namespace std;
 
 TRAJECTOR_PIXELS = [10711, 12315, 13894, 9520, 13894, 12315, 10711]
 STEERING_RATIOS = [-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0]
 R = [100, 150, 200]
 
-class RosNode(object):
+class RosNode:
+    public:
+        RosNode();
+    private:
+        float steering_theta = 0.0
+        float horizon = 0.0
+        float height = 0.0
+        float width = 0.0
+        bool _params_initialized = false
+        float alpha = 0.2
     def __init__(self):
-        self.steering_theta = 0.0
-        self.horizon = 0.0
-        self.height = 0.0
-        self.width = 0.0
-        self._params_initialized = False
-        self.alpha = 0.2
         rospy.init_node('trajectory_arc_node', anonymous= True )
         self.visualize = rospy.get_param('~visualize')
         self.time_since_last_update = rospy.get_rostime().secs
@@ -31,14 +36,24 @@ class RosNode(object):
         rospy.Subscriber('/segmented_image', Image, self.callback, queue_size=1, buff_size=2**24)
         rospy.spin()
 
-    def is_red_pixel(self, image, x, y):
-        if image[y, x, 2] == 255 and image[y, x, 0] == 0 and image[y, x, 1] == 0:
-            return 1
-        return 0
+	bool is_red_pixel(vector<vector<vector<float>>> image, int x, int y);
+	vector<float> softmax(vector<float> x);
+    int centerTrajectories(vector<vector<vector<float>>> image, int r, bool visualize=true)
+    {
 
-    def softmax(self, x):
-        """Compute softmax values for each sets of scores in x."""
-        return np.exp(x) / np.sum(np.exp(x), axis=0)
+        int red_pixel_count = 0;
+        int height = image.size();
+        int width = image[0].size();
+        int horizion = height*.4;
+      
+        for(int y = height-50; y > horizion; y--)
+        {
+            xL = int((ceil( (float)width / 2 ) -r))
+            xR = int((ceil( (float)width / 2 ) +r))
+            for(int x = xL; x < xR; x++)
+            {
+                red_pixel_count += 
+
 
     ## Center Trajectories
     def center_trajectories(self, image, r, visualize=True):

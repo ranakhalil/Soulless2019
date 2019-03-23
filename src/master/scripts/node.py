@@ -23,6 +23,9 @@ class RosNode(object):
             msg.enable_control = True
             rospy.logerr(msg)
             self.enable_pub.publish(msg)
+            msg = Float64()
+            msg.data = 10
+            self.speed_pub.publish(msg)
         if self.mode == 'test':
             rospy.logerr('In test mode')
             msg = EnableDisable()

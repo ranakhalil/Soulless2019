@@ -14,14 +14,7 @@ TRAJECTOR_PIXELS = [10711, 12315, 13894, 9520, 13894, 12315, 10711]
 STEERING_RATIOS = [-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0]
 R = [100, 150, 200]
 
-class RosNode(object):
-    def __init__(self):
-        self.steering_theta = 0.0
-        self.horizon = 0.0
-        self.height = 0.0
-        self.width = 0.0
-        self._params_initialized = False
-        self.alpha = 0.2
+RosNode::RosNode() {
         rospy.init_node('trajectory_arc_node', anonymous= True )
         self.visualize = rospy.get_param('~visualize')
         self.time_since_last_update = rospy.get_rostime().secs
@@ -30,6 +23,27 @@ class RosNode(object):
         self.imageTrajectoryPub = rospy.Publisher('/trajectory_image', Image, queue_size=1)
         rospy.Subscriber('/segmented_image', Image, self.callback, queue_size=1, buff_size=2**24)
         rospy.spin()
+}
+
+bool is_red_pixel(vector<vector<vector<float>>> image, int x, int y)
+{
+	return image[y][x][0] == 0 and image[y][x][1] == 0 and image[y][x][2] == 255; 
+}
+
+vector<float> softmax(vector<float> x)
+{
+    vector<float> softmax_x;
+    x_sum = 0;
+	for(float value : x)
+	{
+		x_sum += exp(value)
+	}
+    for(float value : x)
+	{
+		softmax_x.push_back(exp(value)/x_sum);
+	}
+    return softmax_x;
+}
 
     def is_red_pixel(self, image, x, y):
         if image[y, x, 2] == 255 and image[y, x, 0] == 0 and image[y, x, 1] == 0:
