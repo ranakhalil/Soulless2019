@@ -27,5 +27,6 @@ class TrajectoryArc {
 	    int right_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true);
 	    int left_trajectories(vector<vector<vector<float>>> image, int R, int r, int LTolerance, bool visualize=true);
         void callback(const sensor_msgs::ImageConstPtr& msg);
+        int dot(vector<float> v_a, vector<float> v_b);
 };
 
