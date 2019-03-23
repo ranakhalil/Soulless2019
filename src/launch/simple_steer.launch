@@ -1,0 +1,59 @@
+<launch>
+  <arg name="camera_port" default="0"/>
+  <arg name="gps_serial_port" default="/dev/ttyACM1"/>
+  <arg name="simple_steer" default="true"/>
+  <arg name="poly_deg" default="1"/>
+  <arg name="can_channel" default="0"/>
+  <arg name="mode" default="record"/>
+  <!-- <node name="trajectory_node" pkg="trajectory_node" type="trajectory.py" >
+    <param name="simple_steer" value="$(arg simple_steer)" type="bool" />
+    <param name="poly_deg" value="$(arg poly_deg)"/>
+  </node> -->
+  <node name="segmentation_node" pkg="segmentation_node" type="segment.py" />
+  <node name="obd_reader" pkg="obd_reader" type="obd_reader.py" />
+  <node name="roscco_node" pkg="roscco" type="roscco_node">
+    <param name="_can_channel" value="$(arg can_channel)"/>
+  </node>
+  <node name="camera_node" pkg="camera_node" type="camera.py" >
+   <param name="camera_port" value="$(arg camera_port)" />
+  </node>
+  <node ns="speed" name="lateral_pid" pkg="pid" type="controller" >
+    <param name="Kp" value="0.02" />
+    <param name="Ki" value="0.001" />
+    <param name="Kd" value="0" />
+    <param name="upper_limit" value="1" />
+    <param name="lower_limit" value="-1" />
+    <param name="windup_limit" value="1" />
+    <param name="max_loop_frequency" value="100.0" />
+    <param name="min_loop_frequency" value="100.0" />
+    
+    <remap from="state" to="/current_velocity"/>
+    <remap from="control_effort" to="/throttle"/>
+  </node>
+
+
+  <node ns="steer" name="lateral_pid" pkg="pid" type="controller" >
+    <param name="Kp" value="0.001" />
+    <param name="Ki" value="0.00001" />
+    <param name="Kd" value="0" />
+    <param name="upper_limit" value="1" />
+    <param name="lower_limit" value="-1" />
+    <param name="windup_limit" value="1" />
+    <param name="max_loop_frequency" value="100.0" />
+    <param name="min_loop_frequency" value="100.0" />
+
+    <remap from="state" to="/current_steering_angle"/>
+    <remap from="setpoint" to="/steering"/>
+    <remap from="control_effort" to="/steer_torque"/>
+  </node>
+  <node name="master" pkg="master" type="node.py">
+    <param name="mode" value="$(arg mode)"/>
+  </node>
+    
+  <node name="relay_speed" pkg="lateral_controller" type="relay.py"/>
+  <node name="relay_steer" pkg="steer_relay" type="relay.py"/>
+  <include file="$(find razor_imu_9dof)/launch/razor-pub.launch" />
+  <node name="gps" pkg="gps" type="node.py" >
+    <param name="serial_port" value="$(arg gps_serial_port)" />
+  </node>
+</launch>

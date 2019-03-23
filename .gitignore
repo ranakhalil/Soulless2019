@@ -1,3 +1,4 @@
 src/CMakeLists.txt
 build/
 devel/
+*.bag
