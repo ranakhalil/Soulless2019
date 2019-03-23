@@ -24,7 +24,7 @@ int TrajectoryArc::is_red_pixel(vector<vector<vector<float>>> image, int x, int 
 
 int TrajectoryArc::is_green_pixel(vector<vector<vector<float>>> image, int x, int y)
 {
-	return (image[y][x][0] == 0 and image[y][x][1] == 255 and image[y][x][2] == 0);
+	return (image[y][x][0] == 0 && image[y][x][1] == 255 && image[y][x][2] == 0);
 }
 
 vector<float> TrajectoryArc::softmax(vector<float> x)
