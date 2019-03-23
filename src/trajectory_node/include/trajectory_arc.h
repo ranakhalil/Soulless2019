@@ -26,6 +26,7 @@ class TrajectoryArc {
         float width = 0.0;
         bool _params_initialized = false;
         float alpha = 0.2;
+        bool visualize = true;
         ros::NodeHandle nodeHandle_;
         ros::Publisher  steeringPublisher_;
         ros::Publisher  steeringTrajectoryPublisher_;

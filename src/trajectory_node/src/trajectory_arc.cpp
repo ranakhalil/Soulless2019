@@ -228,14 +228,14 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
             return;
         }
         
-        results[0] = (float)this->left_trajectories(cv_ptr->image, R[0], 10, 10, false);
-        results[1] = (float)this->left_trajectories(cv_ptr->image, R[1], 10, 10, false);
-        results[2] = (float)this->left_trajectories(cv_ptr->image, R[2], 10, 10, false);
-        results[3] = (float)this->center_trajectories(cv_ptr->image, 20, false);
-        results[4] = (float)this->right_trajectories(cv_ptr->image, R[2], 10, 10, false);
-        results[5] = (float)this->right_trajectories(cv_ptr->image, R[1], 10, 10, false);
-        results[6] = (float)this->right_trajectories(cv_ptr->image, R[0], 10, 10, false);
-        ROS_ERROR("results[0] %.3f", results[0]);
+        results[0] = (float)this->left_trajectories(cv_ptr->image, R[0], 10, 10, this->visualize);
+        results[1] = (float)this->left_trajectories(cv_ptr->image, R[1], 10, 10, this->visualize);
+        results[2] = (float)this->left_trajectories(cv_ptr->image, R[2], 10, 10, this->visualize);
+        results[3] = (float)this->center_trajectories(cv_ptr->image, 20, this->visualize);
+        results[4] = (float)this->right_trajectories(cv_ptr->image, R[2], 10, 10, this->visualize);
+        results[5] = (float)this->right_trajectories(cv_ptr->image, R[1], 10, 10, this->visualize);
+        results[6] = (float)this->right_trajectories(cv_ptr->image, R[0], 10, 10, this->visualize);
+        for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
         for(int i=0; i < 7; i++) {
             results[i] /= (float)TRAJECTOR_PIXELS[i];
         }
@@ -251,7 +251,7 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
         this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
 
         std_msgs::Float64 steering_msg;
-        steering_msg.data = max( min( (float)(450 * this->steering_theta), (float) 450.0), (float)-450.0);
+        steering_msg.data = max( min( (float)(250 * this->steering_theta), (float) 450.0), (float)-450.0);
         this->steeringPublisher_.publish(steering_msg);  
     }
 
