@@ -8,10 +8,10 @@ import serial
 class RosNode(object):
     def __init__(self):
         rospy.init_node('gps_node', anonymous=True)
-        self.camera_port = rospy.get_param("~serial_port")
+        self.serial_port = rospy.get_param("~serial_port")
         self.gps_pub = rospy.Publisher('gps', NavSatFix, queue_size=1)
         self.rate = rospy.Rate(10)
-        self.ser = serial.Serial('/dev/ttyACM0', 115200)
+        self.ser = serial.Serial(self.serial_port, 115200)
     
     def loop(self):
         while not rospy.is_shutdown():
@@ -23,6 +23,8 @@ class RosNode(object):
                 msg.longitude = float(data[2])
                 msg.altitude = float(data[3])
                 self.gps_pub.publish(msg)
+            else:
+                rospy.logerr("Got {}".format(data))
             self.rate.sleep()
 
 

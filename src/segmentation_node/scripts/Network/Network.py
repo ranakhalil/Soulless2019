@@ -69,7 +69,7 @@ class SegNet(nn.Module):
 
         # Build deconvolution
         layer_sizes_dec = {i: size for i, size in enumerate(
-            [1024, 512, 512, 512, 256, 512, 256, 256, 512, 256, 128, 256, 128, 128, 64, self.number_of_classes]
+            [1024, 512, 512, 512, 256, 512, 256, 256, 512, 256, 128, 256, 128, 128, 96, self.number_of_classes]
         )}
         kernel_sizes_dec = {i: size for i, size in enumerate([3, 1, 3, 3, 1, 3, 1, 3, 3, 1, 3, 3, 1, 3, 3, 3])}
         upscale = [2, 7, 10, 13, 14]

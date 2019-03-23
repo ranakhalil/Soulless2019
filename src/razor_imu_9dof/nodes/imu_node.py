@@ -149,16 +149,19 @@ seq=0
 accel_factor = 9.806 / 256.0    # sensor reports accel as 256.0 = 1G (9.8m/s^2). Convert to m/s^2.
 rospy.loginfo("Giving the razor IMU board 5 seconds to boot...")
 rospy.sleep(5) # Sleep for 5 seconds to wait for the board to boot
-
+rospy.loginfo('Done sleeping...')
 ### configure board ###
 #stop datastream
 ser.write('#o0' + chr(13))
-
+rospy.loginfo('Wrote to ser')
 #discard old input
 #automatic flush - NOT WORKING
-#ser.flushInput()  #discard old input, still in invalid format
+ser.flushInput()  #discard old input, still in invalid format
+ser.flushOutput()
 #flush manually, as above command is not working
-discard = ser.readlines() 
+#discard = ser.readlines()
+rospy.loginfo('Read lines')
+
 
 #set output mode
 ser.write('#ox' + chr(13)) # To start display angle and sensor reading in text
@@ -200,11 +203,11 @@ ser.write('#cgz' + str(gyro_average_offset_z) + chr(13))
 #print calibration values for verification by user
 ser.flushInput()
 ser.write('#p' + chr(13))
-calib_data = ser.readlines()
-calib_data_print = "Printing set calibration values:\r\n"
-for line in calib_data:
-    calib_data_print += line
-rospy.loginfo(calib_data_print)
+# calib_data = ser.readlines()
+# calib_data_print = "Printing set calibration values:\r\n"
+# for line in calib_data:
+#     calib_data_print += line
+# rospy.loginfo(calib_data_print)
 
 #start datastream
 ser.write('#o1' + chr(13))
@@ -212,17 +215,19 @@ ser.write('#o1' + chr(13))
 #automatic flush - NOT WORKING
 #ser.flushInput()  #discard old input, still in invalid format
 #flush manually, as above command is not working - it breaks the serial connection
-rospy.loginfo("Flushing first 200 IMU entries...")
-for x in range(0, 200):
-    line = ser.readline()
+#rospy.loginfo("Flushing first 200 IMU entries...")
+#for x in range(0, 200):
+#    line = ser.readline()
 rospy.loginfo("Publishing IMU data...")
 #f = open("raw_imu_data.log", 'w')
-
+ser.flushInput()
 while not rospy.is_shutdown():
     line = ser.readline()
+    # rospy.logerr(line)
     line = line.replace("#YPRAG=","")   # Delete "#YPRAG="
     #f.write(line)                     # Write to the output log file
     words = string.split(line,",")    # Fields split
+    # rospy.logerr(words)
     if len(words) > 2:
         #in AHRS firmware z axis points down, in ROS z axis points up (see REP 103)
         yaw_deg = -float(words[0])
