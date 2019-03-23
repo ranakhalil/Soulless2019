@@ -19,10 +19,13 @@ class RosNode(object):
         self.height = 0.0
         self.width = 0.0
         self._params_initialized = False
+        self.visualize = False
+        self.alpha = 0.2
         rospy.init_node('trajectory_arc_node', anonymous= True )
         self.time_since_last_update = rospy.get_rostime().secs
         self.bridge = CvBridge()
         self.steeringTwistPub = rospy.Publisher('/steering', Twist, queue_size=1)
+        self.imageTrajectoryPub = rospy.Publisher('/trajectory_image', Image, queue_size=1)
         rospy.Subscriber('/segmented_image', Image, self.callback)
         rospy.spin()
 
@@ -123,29 +126,29 @@ class RosNode(object):
         results.append(self.right_trajectories(image, R[2], 10, 10, False))
         results.append(self.right_trajectories(image, R[1], 10, 10, False))
         results.append(self.right_trajectories(image, R[0], 10, 10, False))
-
-        rospy.logerr('RESULTS from Trajectories %s', str(results).strip('[]'))
-
-        results = np.array( results, dtype=float ) / np.array( TRAJECTOR_PIXELS, dtype=float )
-        rospy.logerr('RESULTS after division %s', str(results).strip('[]') )
+        
+        results = np.array( results, dtype = float ) / np.array( TRAJECTOR_PIXELS, dtype = float )
         results = self.softmax(results)
-        rospy.logerr('RESULTS after softmax %s', str(results).strip('[]'))
 
         results = np.dot(results, STEERING_RATIOS)
 
-        rospy.logerr('RESULTS after dot product %s',  str(results).strip('[]'))
-
-        current_time = rospy.get_rostime().secs
-        self.steering_theta += ( current_time - self.time_since_last_update ) * results
-        rospy.logerr("current_time : %i", current_time)
-        rospy.logerr("time_since_last_update : %i", self.time_since_last_update)
-        rospy.logerr("Steering delta : %i", ( current_time - self.time_since_last_update ))
-        self.time_since_last_update = current_time
+        self.steering_theta = self.alpha * self.steering_theta + (1 - self.alpha) * results
 
         msg = Twist()
         msg.linear.x = 0.0
         msg.angular.x = self.steering_theta
         self.steeringTwistPub.publish(msg)
+        
+        if self.visualize:
+            image_cpy = image.copy()
+            self.left_trajectories(image_cpy, R[0], 10, 10)
+            self.left_trajectories(image_cpy, R[1], 10, 10)
+            self.left_trajectories(image_cpy, R[2], 10, 10)
+            self.center_trajectories(image_cpy, 20)
+            self.right_trajectories(image_cpy, R[2], 10, 10)
+            self.right_trajectories(image_cpy, R[1], 10, 10)
+            self.right_trajectories(image_cpy, R[0], 10, 10)
+            self.imageTrajectoryPub.publish(self.bridge.cv2_to_imgmsg(image_cpy, "bgr8"))
 
 if __name__ == '__main__':
     try:
