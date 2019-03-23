@@ -42,7 +42,7 @@ class RosNode(object):
         tmp = (res == 14)
         res = np.dstack(((res==1)*255, tmp*255, (res==8)*255)).astype(np.uint8)
         self.pub.publish(self.bridge.cv2_to_imgmsg(res, 'rgb8'))
-        rospy.logerr("Segmenting image took {}".format(time.time()-start))
+        # rospy.logerr("Segmenting image took {}".format(time.time()-start))
 
 if __name__ == '__main__':
     try:
