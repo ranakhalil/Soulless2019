@@ -39,7 +39,7 @@ class TrajectoryArc {
         int center_trajectories(cv::Mat image, int r, bool visualize);
 	    int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
 	    int left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
-        int dot(vector<float> v_a, vector<float> v_b);
+        float dot(vector<float> v_a, vector<float> v_b);
         void callback(const sensor_msgs::ImageConstPtr& msg);
 };
 

@@ -13,20 +13,20 @@ TrajectoryArc::TrajectoryArc()
 
 int TrajectoryArc::is_red_pixel(cv::Mat image, int x, int y)
 {
-	if(image.data[y, x, 0] == 255 && image.data[y, x, 1] == 0 && image.data[y, x, 2] == 0)
+	if(image.at<Vec3b>(y, x)[0] == 0 && image.at<Vec3b>(y, x)[1] == 0 && image.at<Vec3b>(y, x)[2] == 255)
 		return 1;
 	return 0;
 }
 
 int TrajectoryArc::is_green_pixel(cv::Mat image, int x, int y)
 {
-	return (image.data[y, x, 0] == 0 && image.data[y, x, 1] == 255 && image.data[y, x, 2] == 0);
+	return (image.at<Vec3b>(y, x)[0] == 0 && image.at<Vec3b>(y, x)[1] == 255 && image.at<Vec3b>(y, x)[2] == 0);
 }
 
-int TrajectoryArc::dot(vector<float> v_a, vector<float> v_b) 
+float TrajectoryArc::dot(vector<float> v_a, vector<float> v_b) 
 {
     float product = 0.0;
-    for (int i = 0; i < v_a.size() -1; i++)
+    for (int i = 0; i < v_a.size(); i++)
     {
         product = product + (v_a[i] * v_b[i]);
     }
@@ -171,7 +171,7 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
         cloned_image = image.clone();
     }
     
-    ROS_ERROR("height-50: %d, horizon: %d", height-50, horizon);
+    // ROS_ERROR("height-50: %d, horizon: %d", height-50, horizon);
 	for(int y = height-50; y > horizon; y--)
 	{
 	    int xL = 0;
@@ -185,16 +185,13 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
         {
              xR = (int) ((ceil( (float) width / 2.0 )+(R-r) )- sqrt((R+r)*(R+r)-( y-height ) * ( y- height )));
         }
-        
-        ROS_ERROR("xR: %d, xL: %d", xR, xL);
         xL = max( min( xL, width ), 0 );
         xR = max( min( xR, width ), 0 );
+        
         int x_count = 0;
-	    for(int x = xR; x < xL; x--)
+	    for(int x = xR; x > xL; x--)
 	    {
 	        red_pixel_count += is_red_pixel(image,x,y);
-            // ROS_ERROR("is_red_pixel: %d", is_red_pixel(image,x,y));
-            // ROS_ERROR("color: %d %d %d", image.data[y, x, 0], image.data[y, x, 1], image.data[y, x, 2]);
 	        if(visualize && is_red_pixel(image,x,y) == 1)
 	        {
             	cloned_image.data[y, x, 0] = 255;
@@ -224,9 +221,8 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
 
 void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
         vector<float> results(7);
-        float steeringDotProduct = 0.0;
         try {
-            cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+            cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
         } catch (cv_bridge::Exception& e) {
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
@@ -239,20 +235,23 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
         results[4] = (float)this->right_trajectories(cv_ptr->image, R[2], 10, 10, false);
         results[5] = (float)this->right_trajectories(cv_ptr->image, R[1], 10, 10, false);
         results[6] = (float)this->right_trajectories(cv_ptr->image, R[0], 10, 10, false);
-        ROS_ERROR("results[0]", results[0]);
+        ROS_ERROR("results[0] %.3f", results[0]);
         for(int i=0; i < 7; i++) {
-            
             results[i] /= (float)TRAJECTOR_PIXELS[i];
         }
+        for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
         
         results = this->softmax(results);
-        steeringDotProduct = this->dot(results, STEERING_RATIOS);
-
-        steeringDotProduct = this->dot(results, STEERING_RATIOS);
-        this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
+        for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
+        //steeringDotProduct = inner_product(results, results + sizeof(results) / sizeof(results[0]), STEERING_RATIOS, 0);
+        // ROS_ERROR("steeringDotProduct %.3f", steeringDotProduct);
         
+        float steeringDotProduct = this->dot(results, STEERING_RATIOS);
+
+        this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
+
         std_msgs::Float64 steering_msg;
-        steering_msg.data = max( min( (float)(2 * 450 * this->steering_theta), (float) 450.0), (float)-450.0);
+        steering_msg.data = max( min( (float)(450 * this->steering_theta), (float) 450.0), (float)-450.0);
         this->steeringPublisher_.publish(steering_msg);  
     }
 
