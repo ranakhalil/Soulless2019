@@ -4,9 +4,15 @@
 #include <cv_bridge/cv_bridge.h>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/matx.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include "iostream"
 #include <math.h>
 
 using namespace std;
+using namespace cv;
 
 class TrajectoryArc {
     public:
@@ -24,7 +30,7 @@ class TrajectoryArc {
         
         /* Functions */
 	    int is_red_pixel(cv::Mat image, int x, int y);
-	    bool is_green_pixel(cv::Mat image, int x, int y);
+	    int is_green_pixel(cv::Mat image, int x, int y);
 	    vector<float> softmax(vector<float> x);
         int center_trajectories(cv::Mat image, int r, bool visualize);
 	    int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
