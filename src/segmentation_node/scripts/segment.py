@@ -12,7 +12,7 @@ from torch.autograd import Variable
 
 class RosNode(object):
     def __init__(self):
-        self.seg_net = SegNet(15, dropProb = .2, ckpt_file = '/home/jendrik/logs/2019-03-17T19:10:48.816007SegNet/segNetClasses.ckpt')
+        self.seg_net = SegNet(15, dropProb = .2, ckpt_file = '/home/ranakhalil/Thunderhill2019/Soulless2019/src/segmentation_node/checkpoints/mapillary_only.ckpt')
         self.seg_net.half()
         self.seg_net.cuda()
         self.bridge = CvBridge()
@@ -42,7 +42,7 @@ class RosNode(object):
         dat = Variable(torch.from_numpy(dat)).half().permute(0,3,1,2)
         res = self.eval(dat.cuda()).data.cpu().numpy()[0]
         tmp = (res == 14)
-        res = np.dstack(((res==1)*255, tmp*255, (res==8)*255)).astype(np.uint8)
+        res = np.dstack(((res==1)*255, tmp*255, (res==8)* 255)).astype(np.uint8)
         self.pub.publish(self.bridge.cv2_to_imgmsg(res, 'rgb8'))
         # rospy.logerr("Published segmented image")
 

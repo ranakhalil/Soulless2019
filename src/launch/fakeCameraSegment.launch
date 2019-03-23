@@ -1,0 +1,11 @@
+<launch>
+  <!-- <arg name="simple_steer" default="true"/>
+  <arg name="poly_deg" default="1"/> -->
+
+  <!-- <node name="trajectory_node" pkg="trajectory_node" type="trajectory.py" >
+    <param name="simple_steer" value="$(arg simple_steer)" type="bool" />
+    <param name="poly_deg" value="$(arg poly_deg)"/>
+  </node> -->
+  <node name="segmentation_node" pkg="segmentation_node" type="segment.py" />
+  <node name="fake_camera_node" pkg="camera_node" type="fake_camera.py" />
+</launch>

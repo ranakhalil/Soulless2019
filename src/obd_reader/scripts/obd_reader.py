@@ -5,6 +5,8 @@ from roscco.msg import CanFrame
 from std_msgs.msg import Float32
 import struct
 
+# https://github.com/PolySync/oscc/blob/master/api/include/vehicles/kia_niro.h
+
 CAN_SPEED_ID = 0x52A
 KIA_SOUL_OBD_WHEEL_SPEED_CAN_ID = 0x386
 

@@ -10,20 +10,18 @@ class RosNode(object):
     def __init__(self):
         self.bridge = CvBridge()
         self.image_pub = rospy.Publisher('raw_image', Image, queue_size=1)
-        rospy.init_node('camera_node', anonymous=True)
-        self.camera_port = rospy.get_param("~camera_port")
-        cap = cv2.VideoCapture(self.camera_port)
-        while not cap.isOpened():
-            cap = cv2.VideoCapture(self.camera_port)
-            cv2.waitKey(1000)
-            rospy.logerr("Wait for the header")
+        rospy.init_node('fake_camera_node', anonymous=True)
+        cap = cv2.VideoCapture('/home/ranakhalil/Thunderhill2019/Soulless2019/movie.mp4')
+        rate = rospy.Rate(5) # 6hz
         while not rospy.is_shutdown():
             ret, frame = cap.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            if ret is False:
+            if ret is True:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            else:
                 rospy.logerr("Failed to read image from camera")
-                continue
+                rospy.signal_shutdown("no more images")
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame, 'rgb8'))
+            rate.sleep()
 
 if __name__ == '__main__':
     try:
