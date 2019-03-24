@@ -18,9 +18,9 @@ int TrajectoryArc::is_red_pixel(cv::Mat image, int x, int y)
 	return 0;
 }
 
-int TrajectoryArc::is_green_pixel(cv::Mat image, int x, int y)
+int TrajectoryArc::is_cone_or_lane(cv::Mat image, int x, int y)
 {
-	return (image.at<Vec3b>(y, x)[0] == 0 && image.at<Vec3b>(y, x)[1] == 255 && image.at<Vec3b>(y, x)[2] == 0);
+	return (image.at<Vec3b>(y, x)[0] == 0 && (image.at<Vec3b>(y, x)[1] == 255 ^ image.at<Vec3b>(y, x)[2] == 255));
 }
 
 float TrajectoryArc::dot(vector<float> v_a, vector<float> v_b) 
@@ -71,7 +71,7 @@ int TrajectoryArc::center_trajectories(cv::Mat image, int r, bool visualize=fals
             	this->cloned_image_.at<Vec3b>(y, x)[1] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[2] = 255;
             }
-            else if(is_green_pixel(image, x, y))
+            else if(is_cone_or_lane(image, x, y))
             {
                 return red_pixel_count;
             }
@@ -117,7 +117,7 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
             	this->cloned_image_.at<Vec3b>(y, x)[1] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[2] = 255;
 	        }
-	        else if(is_green_pixel(image,x,y)) {
+	        else if(is_cone_or_lane(image,x,y)) {
                 if (x_count < LTolerance) {
 	                red_pixel_count += x_count;
                     return red_pixel_count;
@@ -164,7 +164,7 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
             	this->cloned_image_.at<Vec3b>(y, x)[1] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[2] = 255;
 	        }
-	        else if(is_green_pixel(image,x,y)) {
+	        else if(is_cone_or_lane(image,x,y)) {
                 if (x_count < LTolerance) {
 	                red_pixel_count += x_count;
                     return red_pixel_count;

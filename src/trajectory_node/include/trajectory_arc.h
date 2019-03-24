@@ -37,7 +37,7 @@ class TrajectoryArc {
         
         /* Functions */
 	    int is_red_pixel(cv::Mat image, int x, int y);
-	    int is_green_pixel(cv::Mat image, int x, int y);
+	    int is_cone_or_lane(cv::Mat image, int x, int y);
 	    vector<float> softmax(vector<float> x);
         int center_trajectories(cv::Mat image, int r, bool visualize);
 	    int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
