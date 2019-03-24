@@ -6,17 +6,24 @@
   <arg name="can_channel" default="0"/>
   <arg name="mode" default="record"/>
   <arg name="visualize_trajectory" default="false"/>
+  <arg name="not_testing" default="true"/>
   <node name="trajectory_arc_node" pkg="trajectory_node" type="trajectory_node"> 
     <param name="visualize" value="$(arg visualize_trajectory)" />
   </node>
   <node name="segmentation_node" pkg="segmentation_node" type="segment.py" />
-  <node name="obd_reader" pkg="obd_reader" type="obd_reader.py" />
-  <node name="roscco_node" pkg="roscco" type="roscco_node">
-    <param name="_can_channel" value="$(arg can_channel)"/>
-  </node>
-  <node name="camera_node" pkg="camera_node" type="camera.py" >
-   <param name="camera_port" value="$(arg camera_port)" />
-  </node>
+  <group if="$(arg not_testing)">
+    <node name="obd_reader" pkg="obd_reader" type="obd_reader.py" />
+    <node name="roscco_node" pkg="roscco" type="roscco_node">
+      <param name="_can_channel" value="$(arg can_channel)"/>
+    </node>
+    <node name="camera_node" pkg="camera_node" type="camera.py" >
+     <param name="camera_port" value="$(arg camera_port)" />
+    </node>
+    <include file="$(find razor_imu_9dof)/launch/razor-pub.launch" />
+    <node name="gps" pkg="gps" type="node.py" >
+      <param name="serial_port" value="$(arg gps_serial_port)" />
+    </node>
+  </group> 
   <node ns="speed" name="lateral_pid" pkg="pid" type="controller" >
     <param name="Kp" value="0.02" />
     <param name="Ki" value="0.001" />
@@ -52,8 +59,4 @@
     
   <node name="relay_speed" pkg="lateral_controller" type="relay.py"/>
   <node name="relay_steer" pkg="steer_relay" type="relay.py"/>
-  <include file="$(find razor_imu_9dof)/launch/razor-pub.launch" />
-  <node name="gps" pkg="gps" type="node.py" >
-    <param name="serial_port" value="$(arg gps_serial_port)" />
-  </node>
 </launch>

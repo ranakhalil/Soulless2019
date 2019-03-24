@@ -1,7 +1,7 @@
 #include "trajectory_arc.h"
 
 vector<int> TRAJECTOR_PIXELS = {10711, 12315, 13894, 9520, 13894, 12315, 10711};
-vector<float> STEERING_RATIOS = {-1.0, -0.6, -0.3, 0, 0.3, 0.6, 1.0};
+vector<float> STEERING_RATIOS = {-1.2, -.9, -0.8, 0, 0.8, .9, 1.2};
 vector<int> R = {100, 150, 200};
 
 TrajectoryArc::TrajectoryArc()
@@ -109,42 +109,38 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
         xL = max( min( xL, width ), 0 );
         xR = max( min( xR, width ), 0 );
         int x_count = 0;    
-	    for(int x = xL; x < xR; x++)
-	    {
-	        red_pixel_count += is_red_pixel(image,x,y);
+	    for(int x = xL; x < xR; x++) {
+	        x_count += is_red_pixel(image,x,y);
 	        if(visualize && is_red_pixel(image,x,y))
 	        {
             	this->cloned_image_.at<Vec3b>(y, x)[0] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[1] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[2] = 255;
 	        }
-	        else if(is_green_pixel(image,x,y)) 
-            {
-                if (x_count < LTolerance) 
-                {
+	        else if(is_green_pixel(image,x,y)) {
+                if (x_count < LTolerance) {
+	                red_pixel_count += x_count;
                     return red_pixel_count;
-                }
-                else {
-                    x_count++;
+                } else {
                     break;
                 }
             }
+            
 	    }
+	    red_pixel_count += x_count;
 	}
 
 	return red_pixel_count;
 }
 
-int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize=true)
-{
-	int red_pixel_count = 0;
+int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize=true) {
+    int red_pixel_count = 0;
     cv::Size size = image.size();
     int height = size.height;
     int width = size.width;
     int horizon = height * 0.4;
     
-	for(int y = height-50; y > horizon; y--)
-	{
+    for(int y = height-50; y > horizon; y--) {
 	    int xL = 0;
 	    int xR = 0;
 	    if (( R - r ) * ( R - r )-( y - height ) * ( y - height) >= 0)
@@ -160,27 +156,25 @@ int TrajectoryArc::left_trajectories(cv::Mat image, int R, int r, int LTolerance
         xR = max( min( xR, width ), 0 );
         if(xR == xL) continue;
         int x_count = 0;
-	    for(int x = xR; x > xL; x--)
-	    {
-	        red_pixel_count += is_red_pixel(image,x,y);
+	    for(int x = xR; x > xL; x--) {
+	        x_count += is_red_pixel(image,x,y);
 	        if(visualize && is_red_pixel(image,x,y))
 	        {
             	this->cloned_image_.at<Vec3b>(y, x)[0] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[1] = 255;
             	this->cloned_image_.at<Vec3b>(y, x)[2] = 255;
 	        }
-	        else if(is_green_pixel(image,x,y)) 
-            {
-                if (x_count < LTolerance) 
-                {
+	        else if(is_green_pixel(image,x,y)) {
+                if (x_count < LTolerance) {
+	                red_pixel_count += x_count;
                     return red_pixel_count;
-                }
-                else {
-                    x_count++;
+                } else {
                     break;
                 }
             }
+            
 	    }
+	    red_pixel_count += x_count;
 	}
     return red_pixel_count;
 }
@@ -226,6 +220,12 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
         this->steering_theta = this->alpha * this->steering_theta + (1 - this->alpha) * steeringDotProduct;
         std_msgs::Float64 steering_msg;
         steering_msg.data = max( min( (float)(450 * this->steering_theta), (float) 450.0), (float)-450.0);
+        
+        this->steering_theta *= 3;
+        cv::Size size = this->cloned_image_.size();
+        int height = size.height;
+        int width = size.width;
+        arrowedLine(this->cloned_image_, Point(width/2, height), Point(width/2 + 100*sin(3.14159/9*this->steering_theta), height - 100*cos(3.14159/9*this->steering_theta)), Scalar(0,0,0), 20);
         this->steeringPublisher_.publish(steering_msg);
         sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(
             std_msgs::Header(), 
