@@ -304,6 +304,7 @@ int TrajectoryArc::left_trajectories_count(cv::Mat image, int R, int r) {
 
 void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
         vector<float> results(7);
+        std::vector<Pos> current_cones;
         try {
             cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
         } catch (cv_bridge::Exception& e) {
@@ -311,15 +312,6 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
             return;
         }
         Mat image = cv_ptr->image;
-        //cv::Size size = start_image.size();
-        //int height = size.height;
-        //int width = size.width;
-        //int startX=0,startY=0,new_width=width,new_height=height;
-        //Mat image(Rect(startX, startY, width, height));
-
-
-        // Copy the data into new matrix
-        // image.copyTo(start_image);
         if (TRAJECTOR_PIXELS[0] == 0) {
             TRAJECTOR_PIXELS[0] = (float)this->left_trajectories_count(image, R[0], 10);
             TRAJECTOR_PIXELS[1] = (float)this->left_trajectories_count(image, R[1], 10);
@@ -340,6 +332,7 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
             results[4] = (float)this->right_trajectories(image, R[2], 10, 10, true);
             results[5] = (float)this->right_trajectories(image, R[1], 10, 10, true);
             results[6] = (float)this->right_trajectories(image, R[0], 10, 10, true);
+            current_cones = this->cone_pos(image);
         }
         else 
         {
@@ -350,7 +343,10 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
             results[4] = (float)this->right_trajectories(image, R[2], 10, 10, false);
             results[5] = (float)this->right_trajectories(image, R[1], 10, 10, false);
             results[6] = (float)this->right_trajectories(image, R[0], 10, 10, false);
+            current_cones = this->cone_pos(image);
         }
+
+        ROS_INFO("Cones Found : %d ", current_cones.size());
         
         for(int i=0; i < 7; i++) ROS_ERROR("results[%d] %.3f", i, results[i]);
         for(int i=0; i < 7; i++) {
