@@ -68,6 +68,18 @@ std::vector<Pos> TrajectoryArc::cone_pos(cv::Mat image)
     return cones;
 }
 
+void TrajectoryArc::cone_lines(cv::Mat image)
+{
+	std::vector<Pos> cones = cone_pos(image);
+	int cone0 = 0;
+	for(int cone1 = 1; cone1 < cones.size(); cone1++)
+	{
+		line(image,Point(cones[cone0].x,cones[cone0].y),Point(cones[cone1].x,cones[cone1].y),Scalar(0,255,0),8);
+		cone0 = cone1;
+	}
+
+}
+
 float TrajectoryArc::dot(vector<float> v_a, vector<float> v_b) 
 {
     float product = 0.0;

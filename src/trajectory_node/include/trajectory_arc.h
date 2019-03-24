@@ -49,6 +49,7 @@ class TrajectoryArc {
 	    int is_cone_or_lane(cv::Mat image, int x, int y);
 	    void EraseCone(cv::Mat& image, int y, int x);
 	    std::vector<Pos> cone_pos(cv::Mat image);
+	    void cone_lines(cv::Mat image);
 	    vector<float> softmax(vector<float> x);
         int center_trajectories(cv::Mat image, int r, bool visualize);
         int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
