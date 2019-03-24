@@ -140,7 +140,6 @@ int TrajectoryArc::right_trajectories(cv::Mat image, int R, int r, int LToleranc
     cv::Size size = image.size();
     int height = size.height;
     int width = size.width;
-    Mat cloned_image;
     int horizon = height * 0.4;
 
 	for(int y = height-50; y > horizon; y--)
@@ -289,7 +288,7 @@ void TrajectoryArc::callback(const sensor_msgs::ImageConstPtr& msg) {
 
         if (visualize_)
         {
-            cloned_image_ = image.clone();
+            this->cloned_image_ = image.clone();
             results[0] = (float)this->left_trajectories(image, R[0], 10, 10, true);
             results[1] = (float)this->left_trajectories(image, R[1], 10, 10, true);
             results[2] = (float)this->left_trajectories(image, R[2], 10, 10, true);
