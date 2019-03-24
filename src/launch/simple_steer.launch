@@ -1,5 +1,5 @@
 <launch>
-  <arg name="camera_port" default="0"/>
+  <arg name="camera_port" default="1"/>
   <arg name="gps_serial_port" default="/dev/ttyACM1"/>
   <arg name="simple_steer" default="true"/>
   <arg name="poly_deg" default="1"/>

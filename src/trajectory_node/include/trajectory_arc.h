@@ -36,12 +36,15 @@ class TrajectoryArc {
         Mat cloned_image_;
         
         /* Functions */
-	    int is_red_pixel(cv::Mat image, int x, int y);
-	    int is_green_pixel(cv::Mat image, int x, int y);
-	    vector<float> softmax(vector<float> x);
+        int is_red_pixel(cv::Mat image, int x, int y);
+        int is_green_pixel(cv::Mat image, int x, int y);
+        vector<float> softmax(vector<float> x);
         int center_trajectories(cv::Mat image, int r, bool visualize);
-	    int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
-	    int left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
+        int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
+        int left_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
+        int center_trajectories_count(cv::Mat image, int r);
+        int right_trajectories_count(cv::Mat image, int R, int r);
+        int left_trajectories_count(cv::Mat image, int R, int r);
         float dot(vector<float> v_a, vector<float> v_b);
         void callback(const sensor_msgs::ImageConstPtr& msg);
 };
