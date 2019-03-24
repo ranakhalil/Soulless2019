@@ -1,4 +1,5 @@
 #include "trajectory_arc.h"
+#include <vector>
 
 // vector<int> TRAJECTOR_PIXELS = {10711, 12315, 13894, 9520, 13894, 12315, 10711};
 vector<int> TRAJECTOR_PIXELS = {0, 0, 0, 0, 0, 0, 0};
@@ -22,6 +23,49 @@ int TrajectoryArc::is_red_pixel(cv::Mat image, int x, int y)
 int TrajectoryArc::is_cone_or_lane(cv::Mat image, int x, int y)
 {
 	return (image.at<Vec3b>(y, x)[0] == 0 && (image.at<Vec3b>(y, x)[1] == 255 ^ image.at<Vec3b>(y, x)[2] == 255));
+}
+
+void TrajectoryArc::EraseCone(cv::Mat& image, int y, int x)
+{
+	if((x > 0 && x < image.size().width) && (y > 0 && y < image.size().height))
+	{
+
+		// if pixel is blue(cone)
+		if(image.at<Vec3b>(y, x)[0] == 0 && image.at<Vec3b>(y, x)[1] == 0 && image.at<Vec3b>(y, x)[2] == 255)
+		{
+			image.at<Vec3b>(y, x)[2] = 0;
+			vector<int> delta = {-1,0,1};
+			for(int dy : delta)
+				for(int dx : delta)
+					EraseCone(image,y+dy,x+dx);
+		}
+	}
+
+}
+
+std::vector<Pos> TrajectoryArc::cone_pos(cv::Mat image)
+{
+	cv::Mat cone_image = image.clone();
+	int height = image.size().height;
+    int width = image.size().width;
+
+    std::vector<Pos> cones;
+
+    for(int y = height; y < horizon; y--)
+    {
+    	for(int x = 0; x < width; x++)
+    	{
+    		// if pixel is blue(part of cone)
+			if(image.at<Vec3b>(y, x)[0] == 0 && image.at<Vec3b>(y, x)[1] == 0 && image.at<Vec3b>(y, x)[2] == 255)
+			{
+				Pos pos(y,x);
+				cones.push_back(pos);
+				// erase adjacent blue pixel(erase that cone)
+				EraseCone(cone_image,y,x);
+			}
+    	}
+    }
+    return cones;
 }
 
 float TrajectoryArc::dot(vector<float> v_a, vector<float> v_b) 

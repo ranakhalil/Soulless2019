@@ -15,6 +15,15 @@
 using namespace std;
 using namespace cv;
 
+struct Pos
+{
+	int y,x;
+
+	Pos(int set_y, int set_x)
+		: y(set_y), x(set_x)
+	{}
+};
+
 class TrajectoryArc {
     public:
         TrajectoryArc();
@@ -38,6 +47,8 @@ class TrajectoryArc {
         /* Functions */
 	    int is_red_pixel(cv::Mat image, int x, int y);
 	    int is_cone_or_lane(cv::Mat image, int x, int y);
+	    void EraseCone(cv::Mat& image, int y, int x);
+	    std::vector<Pos> cone_pos(cv::Mat image);
 	    vector<float> softmax(vector<float> x);
         int center_trajectories(cv::Mat image, int r, bool visualize);
         int right_trajectories(cv::Mat image, int R, int r, int LTolerance, bool visualize);
