@@ -28,8 +28,34 @@ Using the semantic segmentation processed image, we have looked at the driveable
 
 ## 4. Velocity PID controller and OBD reader
 
-TBD more information with code cleanup.
+We are using ROS's [PID](http://wiki.ros.org/pid) package with values tuned in the [this](src/launch/simple_steer.launch) launch file.
+The throttle and steering values of the vehicles are read through two simple nodes, that look as follows:
 
+```
+CAN_SPEED_ID = 0x52A
+KIA_SOUL_OBD_WHEEL_SPEED_CAN_ID = 0x386
+KIA_SOUL_OBD_STEERING_WHEEL_ANGLE_CAN_ID = 0x2B0
+KIA_SOUL_OBD_STEERING_ANGLE_SCALAR = 0.1
+
+...
+
+if can_id == KIA_SOUL_OBD_WHEEL_SPEED_CAN_ID:
+             if not frame.data:
+                  return
+             frame_data = [struct.unpack('B', x)[0] for x in frame.data]
+             speed = 0
+             for i in range(4):
+                 raw = (frame_data[i*2+1] & 0x0F) << 8 | frame_data[i*2]
+                 wheel_speed = int(raw / 3.2) / 10.0;
+                 speed += wheel_speed
+             speed /= 4
+             msg = Float64()
+             msg.data = speed
+             self.speed_pub.publish(msg)
+
+```
+
+Availble at: [obd_reader.py](src/obd_reader/scripts/obd_reader.py)
 
  # Running the code:
 
