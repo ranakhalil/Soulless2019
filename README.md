@@ -68,5 +68,9 @@ Availble at: [obd_reader.py](src/obd_reader/scripts/obd_reader.py)
 
  There is a `launch.sh` file to provide a great entry point to the project. However all launch files are also availble under: https://github.com/ranakhalil/Soulless2019/tree/master/src/launch 
 
+ # Have any questions/suggestion/comments?
+
+ Feel free to open an issue or a PR to our repo. We look forward to hearing from you.
+
 
 
